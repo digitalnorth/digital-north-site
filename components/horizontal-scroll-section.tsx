@@ -39,39 +39,32 @@ const methodSteps = [
 ];
 
 export function HorizontalScrollSection() {
-  const sectionRef = useRef<HTMLDivElement>(null);
-  const triggerRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const section = sectionRef.current;
-    const trigger = triggerRef.current;
-
-    if (!section || !trigger) return;
+    const container = containerRef.current;
+    if (!container) return;
 
     const panels = gsap.utils.toArray('.scroll-panel');
 
-    const scrollTween = gsap.to(panels, {
+    // Proper GSAP horizontal scroll logic
+    gsap.to(panels, {
       xPercent: -100 * (panels.length - 1),
       ease: 'none',
       scrollTrigger: {
-        trigger: trigger,
+        trigger: container,
         pin: true,
         scrub: 1,
-        snap: 1 / (panels.length - 1),
-
-        // *** FIXED LINE ***
-        end: () => '+=' + (section.scrollWidth - window.innerWidth),
+        start: 'top top',
+        end: () => `+=${container.offsetWidth}`,
       },
     });
 
-    return () => {
-      scrollTween.scrollTrigger?.kill();
-      scrollTween.kill();
-    };
+    return () => ScrollTrigger.getAll().forEach((t) => t.kill());
   }, []);
 
   return (
-    <div ref={triggerRef} className="overflow-hidden">
+    <div className="overflow-hidden">
       <div className="py-20 bg-gradient-to-b from-[#0a1628] to-[#0f1d35]">
         <div className="container mx-auto px-8 mb-12">
           <h2 className="text-5xl lg:text-6xl font-bold text-white mb-4">
@@ -82,7 +75,11 @@ export function HorizontalScrollSection() {
           </p>
         </div>
 
-        <div ref={sectionRef} className="flex w-fit">
+        {/* HORIZONTAL SCROLL WRAPPER */}
+        <div
+          ref={containerRef}
+          className="flex w-fit space-x-0"
+        >
           {methodSteps.map((step, index) => {
             const Icon = step.icon;
 
@@ -109,7 +106,9 @@ export function HorizontalScrollSection() {
                           <div className="text-sm font-semibold text-slate-400 mb-2">
                             Step {index + 1} of {methodSteps.length}
                           </div>
-                          <h3 className="text-4xl font-bold text-white">{step.title}</h3>
+                          <h3 className="text-4xl font-bold text-white">
+                            {step.title}
+                          </h3>
                         </div>
                       </div>
 
@@ -123,7 +122,7 @@ export function HorizontalScrollSection() {
                             key={i}
                             className={`h-1 rounded-full transition-all duration-300 ${
                               i === index
-                                ? 'w-12 bg-gradient-to-r ' + step.color
+                                ? `w-12 bg-gradient-to-r ${step.color}`
                                 : 'w-6 bg-slate-700'
                             }`}
                           />
