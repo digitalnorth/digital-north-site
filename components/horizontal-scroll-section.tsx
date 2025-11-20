@@ -48,30 +48,22 @@ export function HorizontalScrollSection() {
 
     if (!section || !trigger) return;
 
-    // Ensure GSAP reads correct panel widths AFTER fonts/layout load
-    const panels = gsap.utils.toArray<HTMLElement>('.scroll-panel');
-
-    // Reset any previous scrollTriggers
-    ScrollTrigger.getAll().forEach((st) => st.kill());
-
-    const totalPanels = panels.length;
+    const panels = gsap.utils.toArray('.scroll-panel');
 
     const scrollTween = gsap.to(panels, {
-      xPercent: -100 * (totalPanels - 1),
+      xPercent: -100 * (panels.length - 1),
       ease: 'none',
       scrollTrigger: {
         trigger: trigger,
-        start: 'top top',
         pin: true,
-        scrub: 1.2,
-        anticipatePin: 1,
-        // ❌ SNAP REMOVED — causes lag + overshoot with Lenis
-        // snap: 1 / (totalPanels - 1),
-        end: () => `+=${section.scrollWidth - window.innerWidth}`,
+        scrub: 1,
+        snap: 1 / (panels.length - 1),
+
+        // *** FIXED LINE ***
+        end: () => '+=' + (section.scrollWidth - window.innerWidth),
       },
     });
 
-    // Clean up
     return () => {
       scrollTween.scrollTrigger?.kill();
       scrollTween.kill();
