@@ -12,19 +12,24 @@ export default function SmoothScroll({ children }: { children: ReactNode }) {
     const lenis = new Lenis({
       duration: 1.1,
       smoothWheel: true,
-      smoothTouch: false,
+      // ❌ smoothTouch removed — not supported in your installed version
     });
 
     function raf(time: number) {
       lenis.raf(time);
       requestAnimationFrame(raf);
     }
+
     requestAnimationFrame(raf);
 
-    // GSAP + Lenis SCROLLER PROXY FIX (Mandatory)
+    // 💡 ScrollTrigger integration with Lenis
     ScrollTrigger.scrollerProxy(document.body, {
-      scrollTop(value) {
-        return arguments.length ? lenis.scrollTo(value) : lenis.scroll;
+      scrollTop(value?: number) {
+        if (typeof value === "number") {
+          // Safe type-checked call
+          lenis.scrollTo(value);
+        }
+        return lenis.scroll;
       },
       getBoundingClientRect() {
         return {
