@@ -3,7 +3,7 @@
 import { ReactNode, useEffect } from "react";
 import Lenis from "@studio-freight/lenis";
 
-// Explicit typing for the Lenis scroll event
+// Typed scroll event
 interface LenisScrollEvent {
   velocity: number;
 }
@@ -11,28 +11,33 @@ interface LenisScrollEvent {
 export default function SmoothScroll({ children }: { children: ReactNode }) {
   useEffect(() => {
     const lenis = new Lenis({
-      duration: 1.3,
-      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      duration: 1.2,
       smoothWheel: true,
+      smoothTouch: false,
     });
 
+    // RAF Sync
     function raf(time: number) {
       lenis.raf(time);
       requestAnimationFrame(raf);
     }
-
     requestAnimationFrame(raf);
 
-    // IGLOO EFFECT — Velocity-based WARP (now typed)
+    // IGLOO SKEW — SAFE VERSION
     lenis.on("scroll", ({ velocity }: LenisScrollEvent) => {
-      const skew = velocity * 0.035;
-      document.body.style.transform = `skewY(${skew}deg)`;
+      const skew = velocity * 0.03;
+
+      const wrapper = document.querySelector(".lenis-wrapper") as HTMLElement;
+      if (wrapper) {
+        wrapper.style.transform = `skewY(${skew}deg)`;
+      }
     });
 
     return () => {
-      document.body.style.transform = "skewY(0deg)";
+      const wrapper = document.querySelector(".lenis-wrapper") as HTMLElement;
+      if (wrapper) wrapper.style.transform = "skewY(0deg)";
     };
   }, []);
 
-  return <>{children}</>;
+  return <div className="lenis-wrapper">{children}</div>;
 }

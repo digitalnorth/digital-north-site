@@ -1,19 +1,17 @@
-import './globals.css';
-import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
+import "./globals.css";
+import type { Metadata } from "next";
+import { Inter } from "next/font/google";
 
-import { CustomCursor } from '@/components/custom-cursor';
-import { Navigation } from '@/components/navigation';
+import { CustomCursor } from "@/components/custom-cursor";
+import { Navigation } from "@/components/navigation";
+import SmoothScroll from "@/components/global/SmoothScroll";
+import NavigationLine from "@/components/global/navigation-line";
 
-// New components we are adding
-import SmoothScroll from '@/components/global/SmoothScroll';
-import NavigationLine from '@/components/global/navigation-line';
-
-const inter = Inter({ subsets: ['latin'] });
+const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: 'Digital North',
-  description: 'We build digital products that push boundaries',
+  title: "Digital North",
+  description: "We build digital products that push boundaries",
 };
 
 export default function RootLayout({
@@ -23,25 +21,21 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={`${inter.className} bg-cosmos text-starlight overflow-x-hidden`}>
-        
-        {/* Custom Cursor */}
+      <body className={`${inter.className} overflow-x-hidden`}>
+        {/* Cursor */}
         <CustomCursor />
 
-        {/* Global Navigation Bar */}
+        {/* Top Navigation */}
         <Navigation />
 
-        {/* Smooth Scroll + Cosmic Spine */}
+        {/* Smooth scroll around scrollable content */}
         <SmoothScroll>
-
-          {/* Cosmic Navigation Line */}
+          {/* Cosmic vertical line */}
           <NavigationLine />
 
-          {/* MAIN CONTENT */}
           <main className="relative z-10">
             {children}
           </main>
-
         </SmoothScroll>
       </body>
     </html>
