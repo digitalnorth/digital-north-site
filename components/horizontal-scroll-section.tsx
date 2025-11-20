@@ -45,22 +45,23 @@ export function HorizontalScrollSection() {
     const container = containerRef.current;
     if (!container) return;
 
-    const panels = gsap.utils.toArray('.scroll-panel');
+    const panels = gsap.utils.toArray<HTMLElement>('.scroll-panel');
 
-    // Proper GSAP horizontal scroll logic
+    const totalPanels = panels.length;
+    const totalScrollWidth = container.scrollWidth - window.innerWidth;
+
     gsap.to(panels, {
-      xPercent: -100 * (panels.length - 1),
+      xPercent: -100 * (totalPanels - 1),
       ease: 'none',
       scrollTrigger: {
         trigger: container,
         pin: true,
         scrub: 1,
         start: 'top top',
-        end: () => `+=${container.offsetWidth}`,
+        end: `+=${totalScrollWidth}`,
+        invalidateOnRefresh: true,
       },
     });
-
-    return () => ScrollTrigger.getAll().forEach((t) => t.kill());
   }, []);
 
   return (
@@ -75,14 +76,9 @@ export function HorizontalScrollSection() {
           </p>
         </div>
 
-        {/* HORIZONTAL SCROLL WRAPPER */}
-        <div
-          ref={containerRef}
-          className="flex w-fit space-x-0"
-        >
+        <div ref={containerRef} className="flex w-fit">
           {methodSteps.map((step, index) => {
             const Icon = step.icon;
-
             return (
               <div
                 key={index}

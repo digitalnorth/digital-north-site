@@ -2,41 +2,48 @@
 
 import { ReactNode, useEffect } from "react";
 import Lenis from "@studio-freight/lenis";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
 
-// Typed scroll event
-interface LenisScrollEvent {
-  velocity: number;
-}
+gsap.registerPlugin(ScrollTrigger);
 
 export default function SmoothScroll({ children }: { children: ReactNode }) {
   useEffect(() => {
     const lenis = new Lenis({
-      duration: 1.2,
+      duration: 1.1,
       smoothWheel: true,
-      // ❌ smoothTouch removed (not supported in your version)
+      smoothTouch: false,
     });
 
-    // RAF Sync
-    const raf = (time: number) => {
+    function raf(time: number) {
       lenis.raf(time);
       requestAnimationFrame(raf);
-    };
-
+    }
     requestAnimationFrame(raf);
 
-    // IGLOO SKEW — safe wrapper transform
-    lenis.on("scroll", ({ velocity }: LenisScrollEvent) => {
-      const skew = velocity * 0.03;
+    // GSAP + Lenis SCROLLER PROXY FIX (Mandatory)
+    ScrollTrigger.scrollerProxy(document.body, {
+      scrollTop(value) {
+        return arguments.length ? lenis.scrollTo(value) : lenis.scroll;
+      },
+      getBoundingClientRect() {
+        return {
+          top: 0,
+          left: 0,
+          width: window.innerWidth,
+          height: window.innerHeight,
+        };
+      },
+    });
 
-      const wrapper = document.querySelector(".lenis-wrapper") as HTMLElement;
-      if (wrapper) wrapper.style.transform = `skewY(${skew}deg)`;
+    lenis.on("scroll", () => {
+      ScrollTrigger.update();
     });
 
     return () => {
-      const wrapper = document.querySelector(".lenis-wrapper") as HTMLElement;
-      if (wrapper) wrapper.style.transform = "skewY(0deg)";
+      ScrollTrigger.killAll();
     };
   }, []);
 
-  return <div className="lenis-wrapper">{children}</div>;
+  return <>{children}</>;
 }
