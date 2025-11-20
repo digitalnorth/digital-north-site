@@ -1,134 +1,150 @@
-"use client";
+'use client';
 
-import { useEffect, useRef } from "react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
-import { Compass, Target, TrendingUp, Navigation } from "lucide-react";
+import { useEffect, useRef } from 'react';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/dist/ScrollTrigger';
+import { Compass, Target, TrendingUp, Navigation } from 'lucide-react';
 
 gsap.registerPlugin(ScrollTrigger);
 
 const methodSteps = [
   {
     icon: Compass,
-    title: "Signal Mapping",
+    title: 'Signal Mapping',
     description:
-      "We identify and analyze market signals, user behaviors, and emerging patterns to understand the landscape.",
-    color: "from-cyan-500 to-blue-500",
+      'We identify and analyze market signals, user behaviors, and emerging patterns to understand the landscape.',
+    color: 'from-cyan-500 to-blue-500',
   },
   {
     icon: Target,
-    title: "North Star Positioning",
+    title: 'North Star Positioning',
     description:
-      "Define your unique value proposition and strategic position in the market that guides all decisions.",
-    color: "from-blue-500 to-indigo-500",
+      'Define your unique value proposition and strategic position in the market that guides all decisions.',
+    color: 'from-blue-500 to-indigo-500',
   },
   {
     icon: TrendingUp,
-    title: "Trajectory Design",
+    title: 'Trajectory Design',
     description:
-      "Chart the optimal path forward with clear milestones, informed by data and aligned with your vision.",
-    color: "from-indigo-500 to-purple-500",
+      'Chart the optimal path forward with clear milestones, informed by data and aligned with your vision.',
+    color: 'from-indigo-500 to-purple-500',
   },
   {
     icon: Navigation,
-    title: "Navigation Execution",
+    title: 'Navigation Execution',
     description:
-      "Execute with precision, adapting to real-time feedback while maintaining course toward your goals.",
-    color: "from-purple-500 to-pink-500",
+      'Execute with precision, adapting to real-time feedback while maintaining course toward your goals.',
+    color: 'from-purple-500 to-pink-500',
   },
 ];
 
 export function HorizontalScrollSection() {
-  const containerRef = useRef<HTMLDivElement>(null);
+  const sectionRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const ctx = gsap.context(() => {
-      const panels = gsap.utils.toArray<HTMLElement>(".scroll-panel");
+    const section = sectionRef.current;
+    const trigger = triggerRef.current;
 
-      if (!panels.length) return;
+    if (!section || !trigger) return;
 
-      gsap.to(panels, {
-        xPercent: -100 * (panels.length - 1),
-        ease: "none",
-        scrollTrigger: {
-          trigger: containerRef.current,
-          pin: true,
-          scrub: 1,
-          anticipatePin: 1,
-          end: () => "+=" + window.innerWidth * panels.length,
-        },
-      });
+    // Ensure GSAP reads correct panel widths AFTER fonts/layout load
+    const panels = gsap.utils.toArray<HTMLElement>('.scroll-panel');
+
+    // Reset any previous scrollTriggers
+    ScrollTrigger.getAll().forEach((st) => st.kill());
+
+    const totalPanels = panels.length;
+
+    const scrollTween = gsap.to(panels, {
+      xPercent: -100 * (totalPanels - 1),
+      ease: 'none',
+      scrollTrigger: {
+        trigger: trigger,
+        start: 'top top',
+        pin: true,
+        scrub: 1.2,
+        anticipatePin: 1,
+        // ❌ SNAP REMOVED — causes lag + overshoot with Lenis
+        // snap: 1 / (totalPanels - 1),
+        end: () => `+=${section.scrollWidth - window.innerWidth}`,
+      },
     });
 
-    return () => ctx.revert();
+    // Clean up
+    return () => {
+      scrollTween.scrollTrigger?.kill();
+      scrollTween.kill();
+    };
   }, []);
 
   return (
-    <section className="bg-gradient-to-b from-[#0a1628] to-[#0f1d35] py-20 relative">
-      <div className="container mx-auto px-8 mb-12">
-        <h2 className="text-5xl lg:text-6xl font-bold text-white mb-4">
-          The Digital North Method
-        </h2>
-        <p className="text-xl text-slate-400 max-w-2xl">
-          Our proven framework for navigating digital transformation
-        </p>
-      </div>
+    <div ref={triggerRef} className="overflow-hidden">
+      <div className="py-20 bg-gradient-to-b from-[#0a1628] to-[#0f1d35]">
+        <div className="container mx-auto px-8 mb-12">
+          <h2 className="text-5xl lg:text-6xl font-bold text-white mb-4">
+            The Digital North Method
+          </h2>
+          <p className="text-xl text-slate-400 max-w-2xl">
+            Our proven framework for navigating digital transformation
+          </p>
+        </div>
 
-      {/* Horizontal Scroll Container */}
-      <div ref={containerRef} className="relative flex w-fit h-screen">
-        {methodSteps.map((step, index) => {
-          const Icon = step.icon;
-          return (
-            <div
-              key={index}
-              className="scroll-panel flex-shrink-0 w-screen h-screen flex items-center justify-center px-8"
-            >
-              <div className="max-w-2xl mx-auto">
-                <div className="relative group">
-                  <div
-                    className={`absolute inset-0 bg-gradient-to-br ${step.color} blur-3xl opacity-20 group-hover:opacity-30 transition-opacity duration-500`}
-                  />
+        <div ref={sectionRef} className="flex w-fit">
+          {methodSteps.map((step, index) => {
+            const Icon = step.icon;
 
-                  <div className="relative bg-slate-800/40 backdrop-blur-sm border border-slate-700/50 rounded-3xl p-12">
-                    <div className="flex items-center gap-6 mb-8">
-                      <div
-                        className={`w-20 h-20 rounded-2xl bg-gradient-to-br ${step.color} flex items-center justify-center`}
-                      >
-                        <Icon className="w-10 h-10 text-white" />
-                      </div>
-                      <div>
-                        <div className="text-sm font-semibold text-slate-400 mb-2">
-                          Step {index + 1} of {methodSteps.length}
-                        </div>
-                        <h3 className="text-4xl font-bold text-white">
-                          {step.title}
-                        </h3>
-                      </div>
-                    </div>
+            return (
+              <div
+                key={index}
+                className="scroll-panel flex-shrink-0 w-screen h-[80vh] flex items-center justify-center px-8"
+              >
+                <div className="max-w-2xl mx-auto">
+                  <div className="relative group">
+                    <div
+                      className={`absolute inset-0 bg-gradient-to-br ${step.color} blur-3xl opacity-20 group-hover:opacity-30 transition-opacity duration-500`}
+                    />
 
-                    <p className="text-xl text-slate-300 leading-relaxed">
-                      {step.description}
-                    </p>
-
-                    <div className="mt-8 flex items-center gap-2">
-                      {methodSteps.map((_, i) => (
+                    <div className="relative bg-slate-800/40 backdrop-blur-sm border border-slate-700/50 rounded-3xl p-12">
+                      <div className="flex items-center gap-6 mb-8">
                         <div
-                          key={i}
-                          className={`h-1 rounded-full transition-all duration-300 ${
-                            i === index
-                              ? "w-12 bg-gradient-to-r " + step.color
-                              : "w-6 bg-slate-700"
-                          }`}
-                        />
-                      ))}
+                          className={`w-20 h-20 rounded-2xl bg-gradient-to-br ${step.color} flex items-center justify-center`}
+                        >
+                          <Icon className="w-10 h-10 text-white" />
+                        </div>
+
+                        <div>
+                          <div className="text-sm font-semibold text-slate-400 mb-2">
+                            Step {index + 1} of {methodSteps.length}
+                          </div>
+                          <h3 className="text-4xl font-bold text-white">{step.title}</h3>
+                        </div>
+                      </div>
+
+                      <p className="text-xl text-slate-300 leading-relaxed">
+                        {step.description}
+                      </p>
+
+                      <div className="mt-8 flex items-center gap-2">
+                        {methodSteps.map((_, i) => (
+                          <div
+                            key={i}
+                            className={`h-1 rounded-full transition-all duration-300 ${
+                              i === index
+                                ? 'w-12 bg-gradient-to-r ' + step.color
+                                : 'w-6 bg-slate-700'
+                            }`}
+                          />
+                        ))}
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
       </div>
-    </section>
+    </div>
   );
 }
